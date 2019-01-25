@@ -1,4 +1,3 @@
-
 local turn = 0
 
 local xpos = -150
@@ -81,7 +80,7 @@ function love.draw()
 	love.graphics.setFont(love.graphics.newFont(36))
 	love.graphics.print('X',xpos,ypos)
 	love.graphics.setFont(love.graphics.newFont(16))
-
+	love.graphics.print('Y',xpos,ypos)
 
 end
 
