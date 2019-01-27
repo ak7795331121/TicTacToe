@@ -74,24 +74,29 @@ def change():
 
 # COM's TURN....
 def comturn():
-    global TURN,POS,COM_POS_PRIO,COM_POS_SEL,b
+    global TURN,POS,COM_POS_PRIO,COM_POS_SEL,b,USER_POS_SEL
     # AI Algorithm
     if len(COM_POS_PRIO) > 2 or len(COM_POS_SEL)<=1:
         POS = random.choice(COM_POS_PRIO)
         COM_POS_PRIO.remove(POS)
     else:
         for x in POS_LEFT:
-            if abs(x - COM_POS_SEL[0]) == abs(x - COM_POS_SEL[1]) or abs(COM_POS_SEL[0] - COM_POS_SEL[1]) == abs(x - COM_POS_SEL[1]):
-                POS = x
-                b = False
+            i = 0
+            while i < len(COM_POS_SEL)-1:
+                if abs(x - COM_POS_SEL[i]) == abs(x - COM_POS_SEL[i+1]) or abs(COM_POS_SEL[i] - COM_POS_SEL[i+1]) == abs(x - COM_POS_SEL[i+1]):
+                    POS = x
+                    b = False
+                    break
+                i = i + 1
+            if not b:
                 break
         else:
             POS = random.choice(POS_LEFT)
-    if len(USER_POS_SEL) >=2:
+    '''if len(USER_POS_SEL) >=2:
         for x in POS_LEFT:
             if abs(x - USER_POS_SEL[0]) == abs(x - USER_POS_SEL[1]) or abs(USER_POS_SEL[0] - USER_POS_SEL[1]) == abs(x - USER_POS_SEL[1]):
                 POS = x
-                break
+                break'''
 
     if POS == 1:
         my_canvas.create_text(180, 90, font = ("Callibri",20), text = 'O')
@@ -114,7 +119,7 @@ def comturn():
     TURN = 1
     COM_POS_SEL.append(POS)
     POS_LEFT.remove(POS)
-    print(COM_POS_SEL, POS_LEFT)
+    print(POS_LEFT, COM_POS_SEL)
     sleep(0.5)
 
 
@@ -159,26 +164,12 @@ while True:
             break
     else:
         my_canvas.itemconfigure(TXT, text = "MY TURN")
-        '''if(len(COM_POS_SEL)>=2):
-            i = 0
-            while i<len(COM_POS_SEL)-1:
-                j = i+1
-                while j<len(COM_POS_SEL):
-                    DIFF.append(abs(COM_POS_SEL[j] - COM_POS_SEL[i]))
-                    j = j + 1
-                i = i + 1
-            for x in DIFF:
-                TEMP[x] = DIFF.count(x)
-            for x in TEMP:
-                if(TEMP[x] >=2 ):
-                    sleep(3)
-                    b = False'''
-        if(not b):
-            print('GameOver! Computer WON the Game.')
+        if(len(POS_LEFT) == 0 and b):
+            print('GameOver! DRAW. NICE Gameplay.....')
             root.destroy()
             break
-        elif(len(POS_LEFT) == 0):
-            print('GameOver! DRAW. NICE Gameplay.....')
+        elif(not b):
+            print('GameOver! Computer WON the Game.')
             root.destroy()
             break
         else:
