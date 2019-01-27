@@ -8,15 +8,22 @@ random.seed()
 global POS
 global TURN
 TURN = 0
+global DIFF
 DIFF = []
+global POS_LEFT
 POS_LEFT = [1,2,3,4,5,6,7,8,9]
+global COM_POS_SEL
 COM_POS_SEL = []
-COM_POS = [1,3,7,9]
+global COM_POS_PRIO
+COM_POS_PRIO = [1,3,7,9]
+global TEMP
 TEMP = {}
 b = True
 
+
 def myturn(event):
     # print("clicked at ", event.x, event.y)
+    global POS,POS_LEFT,COM_POS_PRIO
     if event.x >= 120 and event.x < 240 and event.y >= 40 and event.y < 140:
         POS = 1
         my_canvas.create_text(180, 90, font = ("Callibri",20), text = 'X')
@@ -48,31 +55,28 @@ def myturn(event):
         print("CLICK ON APPROPRIATE POSITION.")
         POS = -1
     if POS!=-1:
-        TURN = 0
+        change()
         POS_LEFT.remove(POS)
-        if POS in COM_POS:
-            COM_POS.remove(POS)
+        if POS in COM_POS_PRIO:
+            COM_POS_PRIO.remove(POS)
     print(POS)
 
-def Change():
+def change():
+    global TURN
     TURN = 0
 
-
 def comturn():
-    if len(COM_POS) > 0:
-        POS = random.choice(COM_POS)    
-        if POS == 1:
-            my_canvas.create_text(180, 90, font = ("Callibri",20), text = 'O')
-        elif POS == 3:
-            my_canvas.create_text(420, 90, font = ("Callibri",20), text = 'O')
-        elif POS == 7:
-            my_canvas.create_text(180, 310, font = ("Callibri",20), text = 'O')
-        else:
-            my_canvas.create_text(420, 310, font = ("Callibri",20), text = 'O')
+    global TURN,POS,COM_POS_PRIO,COM_POS_SEL
+    # AI Algorithm
+    if len(COM_POS_PRIO) > 0:
+        POS = random.choice(COM_POS_PRIO)
+        print(POS)
+        COM_POS_PRIO.remove(POS)
     else:
         print("EMPTY")
     TURN = 1
     COM_POS_SEL.append(POS)
+    sleep(0.5)
 
 
 # Main()
@@ -81,6 +85,7 @@ root = Tk()
 my_canvas = Canvas(root, width = 640, height = 480, background = 'white')
 my_canvas.pack()
 root.bind("<Button-1>", myturn)
+TXT = my_canvas.create_text(40, 15, text = 'MY TURN')
 # Drawing Lines...
 # Vertical Lines.....
 my_canvas.create_line(240,40,240,360)
@@ -104,13 +109,11 @@ my_canvas.create_text(470, 350, text = '9')
 my_canvas.create_text(610,15, text = 'YOU - X')
 my_canvas.create_text(610,30, text = 'COM - O')
 my_canvas.create_text(300,15, text = 'CLICK TO PLACE')
-
 while True:
     if(TURN == 1):
-        my_canvas.create_text(40, 15, text = 'YOUR TURN')
-        print(TURN)
+        my_canvas.itemconfigure(TXT, text = "YOUR TURN")
     else:
-        my_canvas.create_text(40, 15, text = "MY TURN.")
+        my_canvas.itemconfigure(TXT, text = "MY TURN")
         if(len(COM_POS_SEL)>=3):
             i = 0
             while i<len(COM_POS_SEL)-1:
@@ -129,10 +132,8 @@ while True:
             # root.destroy()
             break
         else:
-            # sleep(1)
             comturn()
     root.update()
-            
         
-    
+        
 root.mainloop()
