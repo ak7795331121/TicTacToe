@@ -3,8 +3,10 @@ from tkinter import *
 from time import sleep
 import random
 
+# Seeding Random so that same number is not taken repeatedly....
 random.seed()
 
+#Global Variables
 global POS
 global TURN
 TURN = 0
@@ -14,13 +16,15 @@ global POS_LEFT
 POS_LEFT = [1,2,3,4,5,6,7,8,9]
 global COM_POS_SEL
 COM_POS_SEL = []
+global USER_POS_SEL
+USER_POS_SEL = []
 global COM_POS_PRIO
 COM_POS_PRIO = [1,3,7,9]
 global TEMP
 TEMP = {}
 b = True
 
-
+# USER's TURN....
 def myturn(event):
     # print("clicked at ", event.x, event.y)
     global POS,POS_LEFT,COM_POS_PRIO
@@ -57,25 +61,60 @@ def myturn(event):
     if POS!=-1:
         change()
         POS_LEFT.remove(POS)
+        print(POS_LEFT)
         if POS in COM_POS_PRIO:
             COM_POS_PRIO.remove(POS)
+        USER_POS_SEL.append(POS)
     print(POS)
 
+# Change TURN....
 def change():
     global TURN
     TURN = 0
 
+# COM's TURN....
 def comturn():
-    global TURN,POS,COM_POS_PRIO,COM_POS_SEL
+    global TURN,POS,COM_POS_PRIO,COM_POS_SEL,b
     # AI Algorithm
-    if len(COM_POS_PRIO) > 0:
+    if len(COM_POS_PRIO) > 2 or len(COM_POS_SEL)<=1:
         POS = random.choice(COM_POS_PRIO)
-        print(POS)
         COM_POS_PRIO.remove(POS)
     else:
-        print("EMPTY")
+        for x in POS_LEFT:
+            if abs(x - COM_POS_SEL[0]) == abs(x - COM_POS_SEL[1]) or abs(COM_POS_SEL[0] - COM_POS_SEL[1]) == abs(x - COM_POS_SEL[1]):
+                POS = x
+                b = False
+                break
+        else:
+            POS = random.choice(POS_LEFT)
+    if len(USER_POS_SEL) >=2:
+        for x in POS_LEFT:
+            if abs(x - USER_POS_SEL[0]) == abs(x - USER_POS_SEL[1]) or abs(USER_POS_SEL[0] - USER_POS_SEL[1]) == abs(x - USER_POS_SEL[1]):
+                POS = x
+                break
+
+    if POS == 1:
+        my_canvas.create_text(180, 90, font = ("Callibri",20), text = 'O')
+    elif POS == 2:
+        my_canvas.create_text(300, 90, font = ("Callibri",20), text = 'O')
+    elif POS == 3:
+        my_canvas.create_text(420, 90, font = ("Callibri",20), text = 'O')    
+    elif POS == 4:
+        my_canvas.create_text(180, 200, font = ("Callibri",20), text = 'O')
+    elif POS == 5:
+        my_canvas.create_text(300, 200, font = ("Callibri",20), text = 'O')
+    elif POS == 6:
+        my_canvas.create_text(420, 200, font = ("Callibri",20), text = 'O')
+    elif POS == 7:
+        my_canvas.create_text(180, 310, font = ("Callibri",20), text = 'O')
+    elif POS == 8:
+        my_canvas.create_text(300, 310, font = ("Callibri",20), text = 'O')
+    else:
+        my_canvas.create_text(420, 310, font = ("Callibri",20), text = 'O')
     TURN = 1
     COM_POS_SEL.append(POS)
+    POS_LEFT.remove(POS)
+    print(COM_POS_SEL, POS_LEFT)
     sleep(0.5)
 
 
@@ -109,12 +148,18 @@ my_canvas.create_text(470, 350, text = '9')
 my_canvas.create_text(610,15, text = 'YOU - X')
 my_canvas.create_text(610,30, text = 'COM - O')
 my_canvas.create_text(300,15, text = 'CLICK TO PLACE')
+
+# MainLoop
 while True:
     if(TURN == 1):
         my_canvas.itemconfigure(TXT, text = "YOUR TURN")
+        if(len(POS_LEFT) == 0):
+            print('GameOver! DRAW. NICE Gameplay.....')
+            root.destroy()
+            break
     else:
         my_canvas.itemconfigure(TXT, text = "MY TURN")
-        if(len(COM_POS_SEL)>=3):
+        '''if(len(COM_POS_SEL)>=2):
             i = 0
             while i<len(COM_POS_SEL)-1:
                 j = i+1
@@ -125,11 +170,16 @@ while True:
             for x in DIFF:
                 TEMP[x] = DIFF.count(x)
             for x in TEMP:
-                if(TEMP[x] >=3 ):
-                    b = False
+                if(TEMP[x] >=2 ):
+                    sleep(3)
+                    b = False'''
         if(not b):
             print('GameOver! Computer WON the Game.')
-            # root.destroy()
+            root.destroy()
+            break
+        elif(len(POS_LEFT) == 0):
+            print('GameOver! DRAW. NICE Gameplay.....')
+            root.destroy()
             break
         else:
             comturn()
