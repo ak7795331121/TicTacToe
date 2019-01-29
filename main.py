@@ -8,8 +8,11 @@ random.seed()
 
 #Global Variables
 global POS
+global b
+global bo2
+global bo3
+bo3 = True
 global TURN
-TURN = 0
 global DIFF
 DIFF = []
 global POS_LEFT
@@ -24,11 +27,15 @@ global TEMP
 TEMP = {}
 global b
 b = True
-
+ch = input("Do you want to Play?(Y/N)[Say Y if you are scared of me.....]\n")
+if(ch == 'Y'):
+    TURN = 1
+else:
+    TURN = 0
 # USER's TURN....
 def myturn(event):
-    # print("clicked at ", event.x, event.y)
-    global POS,POS_LEFT,COM_POS_PRIO
+    global POS,POS_LEFT,COM_POS_PRIO,bo3
+    bo3 = True
     if event.x >= 120 and event.x < 240 and event.y >= 40 and event.y < 140:
         POS = 1
         my_canvas.create_text(180, 90, font = ("Callibri",20), text = 'X')
@@ -65,6 +72,17 @@ def myturn(event):
         if POS in COM_POS_PRIO:
             COM_POS_PRIO.remove(POS)
         USER_POS_SEL.append(POS)
+    i = 0
+    while i < len(USER_POS_SEL)-1:
+        j = i + 1
+        while j < len(USER_POS_SEL):
+            if checkrow([USER_POS_SEL[i],USER_POS_SEL[j],POS]) or checkcol([USER_POS_SEL[i],USER_POS_SEL[j],POS]) or checkdiog([USER_POS_SEL[i],USER_POS_SEL[j],POS]):
+                bo3 = False
+                break
+            j = j + 1
+        i = i + 1
+        if not bo3:
+            break
     
 
 # Change TURN....
@@ -89,10 +107,26 @@ def checkdiog(l):
 
 # COM's TURN....
 def comturn():
-    global TURN,POS,COM_POS_PRIO,COM_POS_SEL,b,USER_POS_SEL,POS_LEFT
+    global TURN,POS,COM_POS_PRIO,COM_POS_SEL,b,USER_POS_SEL,POS_LEFT,bo2
     bo = True
+    bo2 = True
     # AI Algorithm
-    if len(COM_POS_PRIO)>0 and len(COM_POS_SEL)<2:
+    for x in POS_LEFT:
+                i = 0
+                while i < len(USER_POS_SEL)-1:
+                    j = i + 1
+                    while j < len(USER_POS_SEL):
+                        if checkrow([USER_POS_SEL[i],USER_POS_SEL[j],x]) or checkcol([USER_POS_SEL[i],USER_POS_SEL[j],x]) or checkdiog([USER_POS_SEL[i],USER_POS_SEL[j],x]):
+                            POS = x
+                            bo2 = False
+                            break
+                        j = j + 1
+                    i = i + 1
+                    if not bo2:
+                        break
+                if not bo2:
+                    break
+    if len(COM_POS_PRIO)>0 and len(COM_POS_SEL)<2 and bo2:
         POS = random.choice(COM_POS_PRIO)
         COM_POS_PRIO.remove(POS)
     else:
@@ -190,34 +224,39 @@ my_canvas.create_text(300,15, text = 'CLICK TO PLACE')
 while True:
     if(TURN == 1):
         if(len(POS_LEFT) == 0):
-            print('GameOver! DRAW. NICE Gameplay.....')
+            print('GameOver! DRAW. NICE Gameplay.')
             # my_canvas.create_text(240, 440, text = 'GameOver! DRAW. NICE Gameplay.....')
             sleep(2)
             root.destroy()
             break
         elif(not b):
-            print('GameOver! Computer WON the Game.')
+            print('GameOver! I WON the Game.:)')
             # my_canvas.create_text(240, 440, text = 'GameOver! Computer WON the Game.')
             sleep(2)
             root.destroy()
             break
 
+
+
     else:
         if(len(POS_LEFT) == 0 and b):
-            print('GameOver! DRAW. NICE Gameplay.....')
+            print('GameOver! DRAW. NICE Gameplay.')
             # my_canvas.create_text(240, 440, text = 'GameOver! DRAW. NICE Gameplay.....')
             sleep(2)
             root.destroy()
             break
         elif(not b):
-            print('GameOver! Computer WON the Game.')
+            print('GameOver! I WON the Game.:)')
             # my_canvas.create_text(240, 440, text = 'GameOver! Computer WON the Game.')
             sleep(2)
             root.destroy()
             break
+        if(not bo3):
+            print('GameOver! You Won The game with the only strategy Possible.:(')
+            sleep(2)
+            root.destroy()
+            break
         else:
-            comturn()
-    root.update()
-        
-        
+            comturn() 
+    root.update()       
 root.mainloop()
