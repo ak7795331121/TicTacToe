@@ -22,6 +22,7 @@ global COM_POS_PRIO
 COM_POS_PRIO = [1,3,7,9]
 global TEMP
 TEMP = {}
+global b
 b = True
 
 # USER's TURN....
@@ -61,39 +62,37 @@ def myturn(event):
     if POS!=-1:
         change()
         POS_LEFT.remove(POS)
-        print(POS_LEFT)
         if POS in COM_POS_PRIO:
             COM_POS_PRIO.remove(POS)
         USER_POS_SEL.append(POS)
-    print(POS)
+    
 
 # Change TURN....
 def change():
     global TURN
     TURN = 0
 
+def checkrow(l):
+    if((1 in l and 2 in l and 3 in l) or (4 in l and 5 in l and 6 in l) or (7 in l and 8 in l and 9 in l)):
+        return True
+    return False
+
+def checkcol(l):
+    if((1 in l and 4 in l and 7 in l) or (2 in l and 5 in l and 8 in l) or (3 in l and 6 in l and 9 in l)):
+        return True
+    return False
+
+def checkdiog(l):
+    if((1 in l and 5 in l and 9 in l) or (3 in l and 5 in l and 7 in l)):
+        return True
+    return False
+
 # COM's TURN....
 def comturn():
-    global TURN,POS,COM_POS_PRIO,COM_POS_SEL,b,USER_POS_SEL
+    global TURN,POS,COM_POS_PRIO,COM_POS_SEL,b,USER_POS_SEL,POS_LEFT
     bo = True
-    bo2 = True
     # AI Algorithm
-    if len(COM_POS_SEL)>=2:
-       for x in POS_LEFT:
-            i = 0
-            while i < len(COM_POS_SEL)-1:
-                j = i + 1
-                while j < len(COM_POS_SEL):
-                    if abs(x - COM_POS_SEL[i]) == abs(x - COM_POS_SEL[j]) or abs(COM_POS_SEL[i] - COM_POS_SEL[j]) == abs(x - COM_POS_SEL[j]):
-                        bo2 = False
-                        break
-                    j = j + 1
-                if not bo2:
-                    break
-                i = i + 1
-            if not bo2:
-                break
-    if len(COM_POS_PRIO) > 0 and len(COM_POS_SEL)<=1 and bo2:
+    if len(COM_POS_PRIO)>0 and len(COM_POS_SEL)<2:
         POS = random.choice(COM_POS_PRIO)
         COM_POS_PRIO.remove(POS)
     else:
@@ -102,35 +101,36 @@ def comturn():
             while i < len(COM_POS_SEL)-1:
                 j = i + 1
                 while j < len(COM_POS_SEL):
-                    if abs(x - COM_POS_SEL[i]) == abs(x - COM_POS_SEL[j]) or abs(COM_POS_SEL[i] - COM_POS_SEL[j]) == abs(x - COM_POS_SEL[j]):
+                    if checkrow([COM_POS_SEL[i],COM_POS_SEL[j],x]) or checkcol([COM_POS_SEL[i],COM_POS_SEL[j],x]) or checkdiog([COM_POS_SEL[i],COM_POS_SEL[j],x]):
                         POS = x
                         b = False
                         break
                     j = j + 1
+                i = i + 1
                 if not b:
                     break
-                i = i + 1
             if not b:
                 break
         else:
-            POS = random.choice(POS_LEFT)
-    if len(USER_POS_SEL) >=2 and b:
-        for x in POS_LEFT:
-            i = 0
-            while i < len(USER_POS_SEL) - 1:
-                j = i + 1
-                while j < len(USER_POS_SEL):
-                    if abs(x - USER_POS_SEL[i]) == abs(x - USER_POS_SEL[j]) or abs(USER_POS_SEL[i] - USER_POS_SEL[j]) == abs(x - USER_POS_SEL[j]):
-                        POS = x
-                        bo = False
+            for x in POS_LEFT:
+                i = 0
+                while i < len(USER_POS_SEL)-1:
+                    j = i + 1
+                    while j < len(USER_POS_SEL):
+                        if checkrow([USER_POS_SEL[i],USER_POS_SEL[j],x]) or checkcol([USER_POS_SEL[i],USER_POS_SEL[j],x]) or checkdiog([USER_POS_SEL[i],USER_POS_SEL[j],x]):
+                            POS = x
+                            bo = False
+                            break
+                        j = j + 1
+                    i = i + 1
+                    if not bo:
                         break
-                    j = j + 1
                 if not bo:
                     break
-                i = i + 1
-            if not bo:
-                break
-
+                if bo:
+                    POS = random.choice(POS_LEFT)
+        
+    
     if POS == 1:
         my_canvas.create_text(180, 90, font = ("Callibri",20), text = 'O')
     elif POS == 2:
@@ -152,7 +152,6 @@ def comturn():
     TURN = 1
     COM_POS_SEL.append(POS)
     POS_LEFT.remove(POS)
-    print(POS_LEFT, COM_POS_SEL)
     sleep(0.5)
 
 
@@ -163,7 +162,6 @@ root.title("TicTacToe")
 my_canvas = Canvas(root, width = 640, height = 480, background = 'white')
 my_canvas.pack()
 root.bind("<Button-1>", myturn)
-TXT = my_canvas.create_text(300, 440, text = 'PLAY')
 # Drawing Lines...
 # Vertical Lines.....
 my_canvas.create_line(240,40,240,360)
@@ -193,17 +191,27 @@ while True:
     if(TURN == 1):
         if(len(POS_LEFT) == 0):
             print('GameOver! DRAW. NICE Gameplay.....')
-            sleep(2)
-            root.destroy()
-            break
-    else:
-        if(len(POS_LEFT) == 0 and b):
-            print('GameOver! DRAW. NICE Gameplay.....')
+            # my_canvas.create_text(240, 440, text = 'GameOver! DRAW. NICE Gameplay.....')
             sleep(2)
             root.destroy()
             break
         elif(not b):
             print('GameOver! Computer WON the Game.')
+            # my_canvas.create_text(240, 440, text = 'GameOver! Computer WON the Game.')
+            sleep(2)
+            root.destroy()
+            break
+
+    else:
+        if(len(POS_LEFT) == 0 and b):
+            print('GameOver! DRAW. NICE Gameplay.....')
+            # my_canvas.create_text(240, 440, text = 'GameOver! DRAW. NICE Gameplay.....')
+            sleep(2)
+            root.destroy()
+            break
+        elif(not b):
+            print('GameOver! Computer WON the Game.')
+            # my_canvas.create_text(240, 440, text = 'GameOver! Computer WON the Game.')
             sleep(2)
             root.destroy()
             break
